@@ -39,7 +39,7 @@ public class JsonHttpResponseHandler extends AsyncHttpResponseHandler {
     //
     // Callbacks to be overridden, typically anonymously
     //
-
+ 
     /**
      * Fired when a request returns successfully and contains a json object
      * at the base of the response string. Override to handle in your
@@ -89,18 +89,22 @@ public class JsonHttpResponseHandler extends AsyncHttpResponseHandler {
 
     @Override
     protected void handleFailureMessage(Throwable e, String responseBody) {
-        if (responseBody != null) try {
-            Object jsonResponse = parseResponse(responseBody);
-            if(jsonResponse instanceof JSONObject) {
-                onFailure(e, (JSONObject)jsonResponse);
-            } else if(jsonResponse instanceof JSONArray) {
-                onFailure(e, (JSONArray)jsonResponse);
-            }
-        }
-        catch(JSONException ex) {
-            onFailure(e, responseBody);
-        }
-        else {
+        if (responseBody != null) {
+        	try {
+	            Object jsonResponse = parseResponse(responseBody);
+	            if(jsonResponse instanceof JSONObject) {
+	                onFailure(e, (JSONObject)jsonResponse);
+	            } else if(jsonResponse instanceof JSONArray) {
+	                onFailure(e, (JSONArray)jsonResponse);
+	            }
+	        }
+	        catch(JSONException ex) {
+	            onFailure(e, responseBody);
+	        }
+	        catch(OutOfMemoryError ex) {
+	        	onFailure(ex, responseBody);
+	        }
+        } else {
             onFailure(e, "");
         }
     }

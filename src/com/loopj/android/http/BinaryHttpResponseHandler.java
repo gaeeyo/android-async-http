@@ -28,10 +28,8 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.util.EntityUtils;
 
-import android.os.Handler;
 import android.os.Message;
-import android.os.Looper;
-
+ 
 /**
  * Used to intercept and handle the responses from requests made using
  * {@link AsyncHttpClient}. Receives response body as byte array with a 
@@ -170,14 +168,15 @@ public class BinaryHttpResponseHandler extends AsyncHttpResponseHandler {
                 entity = new BufferedHttpEntity(temp);
             }
             responseBody = EntityUtils.toByteArray(entity);
+            if(status.getStatusCode() >= 300) {
+                sendFailureMessage(new HttpResponseException(status.getStatusCode(), status.getReasonPhrase()), responseBody);
+            } else {
+                sendSuccessMessage(responseBody);
+            }
         } catch(IOException e) {
             sendFailureMessage(e, (byte[]) null);
-        }
-
-        if(status.getStatusCode() >= 300) {
-            sendFailureMessage(new HttpResponseException(status.getStatusCode(), status.getReasonPhrase()), responseBody);
-        } else {
-            sendSuccessMessage(responseBody);
+        } catch(OutOfMemoryError e) {
+        	sendFailureMessage(e, (byte[]) null);
         }
     }
 }

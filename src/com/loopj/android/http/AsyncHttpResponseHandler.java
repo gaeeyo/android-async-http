@@ -30,7 +30,7 @@ import org.apache.http.util.EntityUtils;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Looper;
-
+ 
 /**
  * Used to intercept and handle the responses from requests made using 
  * {@link AsyncHttpClient}. The {@link #onSuccess(String)} method is 
@@ -217,14 +217,15 @@ public class AsyncHttpResponseHandler {
                 entity = new BufferedHttpEntity(temp);
                 responseBody = EntityUtils.toString(entity, "UTF-8");
             }
+            if(status.getStatusCode() >= 300) {
+                sendFailureMessage(new HttpResponseException(status.getStatusCode(), status.getReasonPhrase()), responseBody);
+            } else {
+                sendSuccessMessage(responseBody);
+            }
         } catch(IOException e) {
             sendFailureMessage(e, (String) null);
-        }
-
-        if(status.getStatusCode() >= 300) {
-            sendFailureMessage(new HttpResponseException(status.getStatusCode(), status.getReasonPhrase()), responseBody);
-        } else {
-            sendSuccessMessage(responseBody);
+        } catch(OutOfMemoryError e) {
+        	sendFailureMessage(e, (String) null);
         }
     }
 }
