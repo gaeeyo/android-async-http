@@ -1,6 +1,8 @@
 
 package com.loopj.android.http;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -8,8 +10,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.entity.BufferedHttpEntity;
-import org.apache.http.util.EntityUtils;
  
 
 
@@ -25,8 +25,13 @@ public class StreamHttpResponseHandler extends AsyncHttpResponseHandler {
             	try {
             		boolean handled = onReceive(status.getStatusCode(), is);
 					if (!handled) {
-					    responseBody = EntityUtils.toString(new BufferedHttpEntity(entity), 
-					    		"UTF-8");
+						ByteArrayOutputStream os = new ByteArrayOutputStream();
+						BufferedInputStream in = new BufferedInputStream(is);
+						int data;
+						while ((data = in.read()) != -1) {
+							os.write(data);
+						}
+					    responseBody = os.toString("UTF-8");
 					}
             	} finally {
             		is.close();
