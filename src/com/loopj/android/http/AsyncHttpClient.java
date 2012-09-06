@@ -20,6 +20,7 @@ package com.loopj.android.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -60,8 +61,8 @@ import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -590,5 +591,19 @@ public class AsyncHttpClient {
         public long getContentLength() {
             return -1;
         }
+        
+        @Override
+		public void writeTo(OutputStream outstream) throws IOException {
+			if (outstream == null) {
+				throw new IllegalArgumentException(
+						"Output stream may not be null");
+			}
+			InputStream instream = getContent();
+			int l;
+			byte[] tmp = new byte[2048];
+			while ((l = instream.read(tmp)) != -1) {
+				outstream.write(tmp, 0, l);
+			}
+		}
     }
 }
